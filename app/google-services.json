@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "124542442327",
+    "firebase_url": "https://hello-world-rest-4dd02-default-rtdb.firebaseio.com",
+    "project_id": "hello-world-rest-4dd02",
+    "storage_bucket": "hello-world-rest-4dd02.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:124542442327:android:d382131ccc7342404e3c12",
+        "android_client_info": {
+          "package_name": "com.example.safepiconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDU9iZ42a_ew5bl0bSEDd0_CHV8kfp1uls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
