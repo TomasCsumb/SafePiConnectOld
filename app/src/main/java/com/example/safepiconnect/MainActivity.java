@@ -2,6 +2,7 @@ package com.example.safepiconnect;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Button;
 
@@ -20,6 +21,10 @@ public class MainActivity extends AppCompatActivity {
     // Write a message to the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference("message");
+    boolean bluetoothAvailable = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
+    boolean bluetoothLEAvailable = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+
+
 
 
     @Override
@@ -32,6 +37,11 @@ public class MainActivity extends AppCompatActivity {
                 PlayIntegrityAppCheckProviderFactory.getInstance());
         setupVariables();
         myRef.setValue("Hello, World!");
+        if(bluetoothAvailable){
+            if(bluetoothLEAvailable){
+                //TODO SCAN FOR BLE DEVICES
+            }
+        }
     }
 
 
