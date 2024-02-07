@@ -13,7 +13,20 @@
           "package_name": "com.example.safepiconnect"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "124542442327-6t056ni0aie7aicdv9b0faopre4odgo9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.safepiconnect",
+            "certificate_hash": "e176fedf0e7232ac509ec67ca7a52170aaf45d91"
+          }
+        },
+        {
+          "client_id": "124542442327-5u8cd7ee4pdnf3slache1paud4g0gc0c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDU9iZ42a_ew5bl0bSEDd0_CHV8kfp1uls"
@@ -21,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124542442327-5u8cd7ee4pdnf3slache1paud4g0gc0c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
