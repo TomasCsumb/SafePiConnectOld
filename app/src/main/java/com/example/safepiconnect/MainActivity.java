@@ -1,5 +1,7 @@
 package com.example.safepiconnect;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -12,10 +14,12 @@ import android.companion.BluetoothLeDeviceFilter;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
+import android.view.View;
 import android.widget.Button;
 
 import com.example.safepiconnect.databinding.ActivityMainBinding;
@@ -28,23 +32,18 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import android.Manifest;
 
 public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding mainBinding;
     Button connectButton;
     private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH_SCAN = 1;
-
-    // Write a message to the database
-//    FirebaseDatabase database = FirebaseDatabase.getInstance();
-//    DatabaseReference myRef = database.getReference("message");
-    boolean bluetoothAvailable;
-    boolean bluetoothLEAvailable;
-    private BluetoothAdapter bluetoothAdapter;
+    private static final int REQUEST_BLUETOOTH_SCAN_PERMISSION = 1;
     private BluetoothLeScanner bluetoothLeScanner;
     private boolean scanning;
 
-    private ScanCallback leScanCallback = new ScanCallback() {
+    private final ScanCallback leScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             // handle individual scan result
@@ -60,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             // handle scan failure
         }
     };
-    private Handler handler = new Handler(Looper.getMainLooper());
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
@@ -89,32 +88,49 @@ public class MainActivity extends AppCompatActivity {
 //        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
 //        firebaseAppCheck.installAppCheckProviderFactory(
 //                PlayIntegrityAppCheckProviderFactory.getInstance());
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 //        CompanionDeviceManager deviceManager = (CompanionDeviceManager) getSystemService(Context.COMPANION_DEVICE_SERVICE);
-        bluetoothAvailable = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
-        bluetoothLEAvailable = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        // Write a message to the database
+        //    FirebaseDatabase database = FirebaseDatabase.getInstance();
+        //    DatabaseReference myRef = database.getReference("message");
+        boolean bluetoothAvailable = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
+        boolean bluetoothLEAvailable = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         setupVariables();
 //        myRef.setValue("Hello, World!");
         if (bluetoothAvailable) {
             if (bluetoothLEAvailable) {
-                scanLeDevice();
+                connectButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            scanLeDevice();
+                        }
+                    }
+                });
             }
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.S)
     private void scanLeDevice() {
         if (!scanning) {
+            // Check if the BLUETOOTH_SCAN permission has been granted
+            if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                // Request the permission
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH_SCAN}, REQUEST_BLUETOOTH_SCAN_PERMISSION);
+                return;
+            }
+
             // Stops scanning after a predefined scan period.
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     scanning = false;
-                    if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.BLUETOOTH_SCAN)) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.BLUETOOTH_SCAN}, MY_PERMISSIONS_REQUEST_BLUETOOTH_SCAN);
-                        return;
+                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED) {
+                        bluetoothLeScanner.stopScan(leScanCallback);
                     }
-                    bluetoothLeScanner.stopScan(leScanCallback);
                 }
             }, SCAN_PERIOD);
 
@@ -127,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
     void setupVariables(){
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
@@ -135,17 +152,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_BLUETOOTH_SCAN:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission was granted
-                    scanLeDevice(); // you can restart scanning here
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        scanLeDevice(); // you can restart scanning here
+                    }
                 } else {
                     // Permission was denied
-                    // Handle the denial appropriately
+
                 }
                 break;
             // You can handle other permission requests here
