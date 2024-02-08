@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
@@ -13,6 +14,7 @@ import android.companion.AssociationRequest;
 import android.companion.BluetoothLeDeviceFilter;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 
 import com.example.safepiconnect.databinding.ActivityMainBinding;
@@ -29,10 +32,12 @@ import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderF
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import android.Manifest;
+import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,22 +46,37 @@ public class MainActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH_SCAN = 1;
     private static final int REQUEST_BLUETOOTH_SCAN_PERMISSION = 1;
     private BluetoothLeScanner bluetoothLeScanner;
+    private List<BluetoothDevice> foundDevices = new ArrayList<>();
+
     private boolean scanning;
+    ArrayAdapter<BluetoothDevice> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, foundDevices);
 
     private final ScanCallback leScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            // handle individual scan result
+            BluetoothDevice device = result.getDevice();
+            if (!foundDevices.contains(device)) {
+                foundDevices.add(device);
+                // Update your list view or notify the adapter
+                updateListView();
+            }
         }
 
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
-            // handle batch scan results
+            for (ScanResult result : results) {
+                BluetoothDevice device = result.getDevice();
+                if (!foundDevices.contains(device)) {
+                    foundDevices.add(device);
+                    // Update your list view or notify the adapter
+                }
+            }
+            updateListView();
         }
 
         @Override
         public void onScanFailed(int errorCode) {
-            // handle scan failure
+            // Handle scan failure
         }
     };
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -98,6 +118,11 @@ public class MainActivity extends AppCompatActivity {
         boolean bluetoothLEAvailable = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         setupVariables();
+        Intent intent = new Intent(MainActivity.this, DisplayDevices.class);
+        ArrayList<String> deviceAddresses = new ArrayList<>();
+        for (BluetoothDevice device : foundDevices) {
+            deviceAddresses.add(device.getAddress());
+        }
 //        myRef.setValue("Hello, World!");
         if (bluetoothAvailable) {
             if (bluetoothLEAvailable) {
@@ -106,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View view) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                             scanLeDevice();
+                            intent.putStringArrayListExtra("DEVICE_ADDRESSES", deviceAddresses);
+                            startActivity(intent);
                         }
                     }
                 });
@@ -169,5 +196,14 @@ public class MainActivity extends AppCompatActivity {
                 break;
             // You can handle other permission requests here
         }
+    }
+
+    private void updateListView() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
 }
