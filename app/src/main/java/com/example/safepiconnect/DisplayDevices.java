@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,6 @@ public class DisplayDevices extends AppCompatActivity {
 
     private List<BluetoothDevice> devices = new ArrayList<>();
     private ArrayAdapter<BluetoothDevice> adapter;
-    ListView listView = findViewById(R.id.listViewDevices);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +29,10 @@ public class DisplayDevices extends AppCompatActivity {
         for (String address : deviceAddresses) {
             BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
             devices.add(device);
+        }
+
+        if(devices.isEmpty()){
+            Toast.makeText(DisplayDevices.this, "NO DEVICES FOUND", Toast.LENGTH_SHORT).show();
         }
 
         setupListView();

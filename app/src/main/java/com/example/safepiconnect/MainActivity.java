@@ -38,6 +38,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import android.Manifest;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,14 +50,16 @@ public class MainActivity extends AppCompatActivity {
     private List<BluetoothDevice> foundDevices = new ArrayList<>();
 
     private boolean scanning;
-    ArrayAdapter<BluetoothDevice> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, foundDevices);
+    private ArrayAdapter<BluetoothDevice> adapter;
 
     private final ScanCallback leScanCallback = new ScanCallback() {
+        //TODO change Toasts to logs
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
             if (!foundDevices.contains(device)) {
                 foundDevices.add(device);
+                Toast.makeText(MainActivity.this, "Device found", Toast.LENGTH_SHORT).show();
                 // Update your list view or notify the adapter
                 updateListView();
             }
@@ -68,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice device = result.getDevice();
                 if (!foundDevices.contains(device)) {
                     foundDevices.add(device);
+                    Toast.makeText(MainActivity.this, "Device found", Toast.LENGTH_SHORT).show();
                     // Update your list view or notify the adapter
                 }
             }
@@ -77,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onScanFailed(int errorCode) {
             // Handle scan failure
+            Toast.makeText(MainActivity.this, "Scan Failed", Toast.LENGTH_SHORT).show();
         }
     };
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -85,20 +90,20 @@ public class MainActivity extends AppCompatActivity {
     private static final long SCAN_PERIOD = 10000;
 
 
-    BluetoothLeDeviceFilter deviceFilter = new BluetoothLeDeviceFilter.Builder()
-            // Match only Bluetooth devices whose name matches the pattern.
-            //TODO change pattern name
-            .setNamePattern(Pattern.compile("My device"))
-            // Match only Bluetooth devices whose service UUID matches this pattern.
-            //.addServiceUuid(new ParcelUuid(new UUID(0x123abcL, -1L)), null)
-            .build();
-
-    AssociationRequest pairingRequest = new AssociationRequest.Builder()
-            // Find only devices that match this request filter.
-            .addDeviceFilter(deviceFilter)
-            // Stop scanning as soon as one device matching the filter is found.
-            .setSingleDevice(true)
-            .build();
+//    BluetoothLeDeviceFilter deviceFilter = new BluetoothLeDeviceFilter.Builder()
+//            // Match only Bluetooth devices whose name matches the pattern.
+//            //TODO change pattern name
+//            .setNamePattern(Pattern.compile("My device"))
+//            // Match only Bluetooth devices whose service UUID matches this pattern.
+//            //.addServiceUuid(new ParcelUuid(new UUID(0x123abcL, -1L)), null)
+//            .build();
+//
+//    AssociationRequest pairingRequest = new AssociationRequest.Builder()
+//            // Find only devices that match this request filter.
+//            .addDeviceFilter(deviceFilter)
+//            // Stop scanning as soon as one device matching the filter is found.
+//            .setSingleDevice(true)
+//            .build();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,21 +123,19 @@ public class MainActivity extends AppCompatActivity {
         boolean bluetoothLEAvailable = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         setupVariables();
-        Intent intent = new Intent(MainActivity.this, DisplayDevices.class);
         ArrayList<String> deviceAddresses = new ArrayList<>();
         for (BluetoothDevice device : foundDevices) {
             deviceAddresses.add(device.getAddress());
         }
-//        myRef.setValue("Hello, World!");
         if (bluetoothAvailable) {
             if (bluetoothLEAvailable) {
                 connectButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            Toast.makeText(MainActivity.this, "Scanning for BLE Devices",
+                                    Toast.LENGTH_LONG).show();
                             scanLeDevice();
-                            intent.putStringArrayListExtra("DEVICE_ADDRESSES", deviceAddresses);
-                            startActivity(intent);
                         }
                     }
                 });
@@ -157,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
                     scanning = false;
                     if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED) {
                         bluetoothLeScanner.stopScan(leScanCallback);
+                        startDisplayDevicesActivity();
                     }
                 }
             }, SCAN_PERIOD);
@@ -168,8 +172,6 @@ public class MainActivity extends AppCompatActivity {
             bluetoothLeScanner.stopScan(leScanCallback);
         }
     }
-
-
 
     void setupVariables(){
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -198,7 +200,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void startDisplayDevicesActivity() {
+        Intent intent = new Intent(MainActivity.this, DisplayDevices.class);
+        ArrayList<String> deviceAddresses = new ArrayList<>();
+        for (BluetoothDevice device : foundDevices) {
+            deviceAddresses.add(device.getAddress());
+        }
+        intent.putStringArrayListExtra("DEVICE_ADDRESSES", deviceAddresses);
+        startActivity(intent);
+    }
+
     private void updateListView() {
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, foundDevices);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
