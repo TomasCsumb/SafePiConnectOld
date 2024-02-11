@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -21,6 +22,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -61,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
                 foundDevices.add(device);
                 Toast.makeText(MainActivity.this, "Device found", Toast.LENGTH_SHORT).show();
                 // Update your list view or notify the adapter
-                updateListView();
             }
         }
 
@@ -75,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
                     // Update your list view or notify the adapter
                 }
             }
-            updateListView();
         }
 
         @Override
@@ -90,21 +90,6 @@ public class MainActivity extends AppCompatActivity {
     private static final long SCAN_PERIOD = 10000;
 
 
-//    BluetoothLeDeviceFilter deviceFilter = new BluetoothLeDeviceFilter.Builder()
-//            // Match only Bluetooth devices whose name matches the pattern.
-//            //TODO change pattern name
-//            .setNamePattern(Pattern.compile("My device"))
-//            // Match only Bluetooth devices whose service UUID matches this pattern.
-//            //.addServiceUuid(new ParcelUuid(new UUID(0x123abcL, -1L)), null)
-//            .build();
-//
-//    AssociationRequest pairingRequest = new AssociationRequest.Builder()
-//            // Find only devices that match this request filter.
-//            .addDeviceFilter(deviceFilter)
-//            // Stop scanning as soon as one device matching the filter is found.
-//            .setSingleDevice(true)
-//            .build();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
 //                PlayIntegrityAppCheckProviderFactory.getInstance());
 //        CompanionDeviceManager deviceManager = (CompanionDeviceManager) getSystemService(Context.COMPANION_DEVICE_SERVICE);
 
+
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         // Write a message to the database
         //    FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -123,10 +109,6 @@ public class MainActivity extends AppCompatActivity {
         boolean bluetoothLEAvailable = getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         setupVariables();
-        ArrayList<String> deviceAddresses = new ArrayList<>();
-        for (BluetoothDevice device : foundDevices) {
-            deviceAddresses.add(device.getAddress());
-        }
         if (bluetoothAvailable) {
             if (bluetoothLEAvailable) {
                 connectButton.setOnClickListener(new View.OnClickListener() {
@@ -160,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
                     scanning = false;
                     if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED) {
                         bluetoothLeScanner.stopScan(leScanCallback);
+
                         startDisplayDevicesActivity();
                     }
                 }
@@ -206,6 +189,11 @@ public class MainActivity extends AppCompatActivity {
         for (BluetoothDevice device : foundDevices) {
             deviceAddresses.add(device.getAddress());
         }
+
+        if(foundDevices.isEmpty()){
+            Toast.makeText(MainActivity.this, "NO DEVICES FOUND", Toast.LENGTH_SHORT).show();
+        }
+
         intent.putStringArrayListExtra("DEVICE_ADDRESSES", deviceAddresses);
         startActivity(intent);
     }
@@ -219,4 +207,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+//    private boolean checkPermissions (){
+//        boolean
+//
+//        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH)
+//                != PackageManager.PERMISSION_GRANTED)
+//        {
+//            // Permission is not granted
+//            // Request Permission
+//            Log.println(Log.DEBUG, "Permission Error", "BLUETOOTH permission denied");
+//        }
+//
+//        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_ADMIN)
+//                != PackageManager.PERMISSION_GRANTED)
+//        {
+//            // Permission is not granted
+//            // Request Permission
+//            Log.println(Log.DEBUG, "Permission Error", "BLUETOOTH_ADMIN permission denied");
+//        }
+//
+//        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_SCAN)
+//                != PackageManager.PERMISSION_GRANTED)
+//        {
+//            // Permission is not granted
+//            // Request Permission
+//            Log.println(Log.DEBUG, "Permission Error", "BLUETOOTH_SCAN permission denied");
+//        }
+//    }
 }

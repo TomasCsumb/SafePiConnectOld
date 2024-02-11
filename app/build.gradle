@@ -52,4 +52,7 @@ dependencies {
     // Add the dependency for the Realtime Database library
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-database")
+
+    implementation 'no.nordicsemi.android:ble:2.7.2'
+    implementation 'no.nordicsemi.android:ble-common:2.7.2'
 }
