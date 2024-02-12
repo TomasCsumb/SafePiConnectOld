@@ -54,5 +54,4 @@ dependencies {
     implementation("com.google.firebase:firebase-database")
 
     implementation 'no.nordicsemi.android:ble:2.7.2'
-    implementation 'no.nordicsemi.android:ble-common:2.7.2'
 }

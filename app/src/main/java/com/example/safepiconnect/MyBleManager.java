@@ -9,11 +9,19 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import android.bluetooth.BluetoothManager;
+
+import java.io.ByteArrayInputStream;
+import java.util.UUID;
+
 import no.nordicsemi.android.ble.BleManager;
 
-public class MyBleManager extends BleManager {
+public class MyBleManager extends BleManager{
 
     private static final String TAG = "MyBleManager";
+//    private ByteArrayInputStream myUUID = new ByteArrayInputStream(51FF12BB-3ED8-46E5-B4F9-D64E2FEC021B)
+    private static final UUID FLUX_SERVICE_UUID = UUID.fromString("A07498CA-AD5B-474E-940D-16F1FBE7E8CD");
+    private static final UUID READ_CHAR_UUID = UUID.fromString("51FF12BB-3ED8-46E5-B4F9-D64E2FEC021B");
 
     public MyBleManager(@NonNull Context context) {
         super(context);
@@ -48,7 +56,7 @@ public class MyBleManager extends BleManager {
         // Return false if a required service has not been discovered.
         BluetoothGattService fluxCapacitorService = gatt.getService(FLUX_SERVICE_UUID);
         if (fluxCapacitorService != null) {
-            fluxCapacitorControlPoint = fluxCapacitorService.getCharacteristic(FLUX_CHAR_UUID);
+            fluxCapacitorControlPoint = fluxCapacitorService.getCharacteristic(READ_CHAR_UUID);
         }
         return fluxCapacitorControlPoint != null;
     }
@@ -76,7 +84,7 @@ public class MyBleManager extends BleManager {
     // Here you may add some high level methods for your device:
     public void enableFluxCapacitor() {
         // Do the magic.
-        writeCharacteristic(fluxCapacitorControlPoint, Flux.enable(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)
-                .enqueue();
+//        writeCharacteristic(fluxCapacitorControlPoint, Flux.enable(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)
+//                .enqueue();
     }
 }

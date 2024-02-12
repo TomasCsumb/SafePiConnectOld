@@ -20,20 +20,23 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nordicsemi.android.ble.BleManager;
+
 
 public class DisplayDevices extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_BLUETOOTH_SCAN = 1;
+    private List<String> deviceRegistry = new ArrayList<>();
     private List<BluetoothDevice> bleDevices = new ArrayList<>();
     private List<String> bleDeviceNames = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private MyBleManager bleManager = new MyBleManager(DisplayDevices.this);
+//    private MyBleManager bleManager = new MyBleManager(DisplayDevices.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_devices);
+        //MAC address of TomasMacBook
+        deviceRegistry.add("AC:C9:06:19:3E:61");
         populateDeviceNames();
         setupListView();
     }
@@ -67,13 +70,35 @@ public class DisplayDevices extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 BluetoothDevice selectedDevice = bleDevices.get(position);
                 // Now you can use selectedDevice to initiate a connection
-                connectToDevice(selectedDevice);
+                if(!connectToDevice(selectedDevice)){
+                    // error could not connect
+                }
+                else{
+                    //check device status
+                    //get services
+                    //pass data
+                }
             }
         });
     }
 
-    private void connectToDevice(BluetoothDevice selectedDevice) {
+    private boolean connectToDevice(BluetoothDevice selectedDevice) {
+        boolean inRegistry = true;
+        if (!deviceRegistry.contains(selectedDevice.getAddress())){
+            inRegistry = false;
+            //error
+            return inRegistry;
+        }
+        else{
+            // connect to device
+            MyBleManager bleManager = new MyBleManager(this);
 
+            // When you want to connect to a device
+            bleManager.connect(selectedDevice)
+                    .useAutoConnect(true) // Set to true if you want to automatically connect to the device when it's in range
+                    .enqueue();
+        }
+        return inRegistry;
     }
 
 
