@@ -22,6 +22,8 @@ public class MyBleManager extends BleManager{
 //    private ByteArrayInputStream myUUID = new ByteArrayInputStream(51FF12BB-3ED8-46E5-B4F9-D64E2FEC021B)
     private static final UUID FLUX_SERVICE_UUID = UUID.fromString("A07498CA-AD5B-474E-940D-16F1FBE7E8CD");
     private static final UUID READ_CHAR_UUID = UUID.fromString("51FF12BB-3ED8-46E5-B4F9-D64E2FEC021B");
+    private static final UUID WRITE_CHAR_UUID = UUID.fromString("52FF12BB-3ED8-46E5-B4F9-D64E2FEC021B");
+
 
     public MyBleManager(@NonNull Context context) {
         super(context);
@@ -48,7 +50,8 @@ public class MyBleManager extends BleManager{
     // ==== Required implementation ====
 
     // This is a reference to a characteristic that the manager will use internally.
-    private BluetoothGattCharacteristic fluxCapacitorControlPoint;
+    private BluetoothGattCharacteristic readCharacteristic;
+    private BluetoothGattCharacteristic writeCharacteristic;
 
     @Override
     protected boolean isRequiredServiceSupported(@NonNull BluetoothGatt gatt) {
@@ -56,9 +59,10 @@ public class MyBleManager extends BleManager{
         // Return false if a required service has not been discovered.
         BluetoothGattService fluxCapacitorService = gatt.getService(FLUX_SERVICE_UUID);
         if (fluxCapacitorService != null) {
-            fluxCapacitorControlPoint = fluxCapacitorService.getCharacteristic(READ_CHAR_UUID);
+            readCharacteristic = fluxCapacitorService.getCharacteristic(READ_CHAR_UUID);
+            writeCharacteristic = fluxCapacitorService.getCharacteristic(WRITE_CHAR_UUID);
         }
-        return fluxCapacitorControlPoint != null;
+        return (readCharacteristic != null && writeCharacteristic != null);
     }
 
     @Override
@@ -76,15 +80,17 @@ public class MyBleManager extends BleManager{
         // This method is called when the services get invalidated, i.e. when the device
         // disconnects.
         // References to characteristics should be nullified here.
-        fluxCapacitorControlPoint = null;
+        readCharacteristic = null;
+        writeCharacteristic = null;
     }
+
 
     // ==== Public API ====
 
     // Here you may add some high level methods for your device:
     public void enableFluxCapacitor() {
         // Do the magic.
-//        writeCharacteristic(fluxCapacitorControlPoint, Flux.enable(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)
+//        writeCharacteristic(writeCharacteristic, Flux.enable(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)
 //                .enqueue();
     }
 }

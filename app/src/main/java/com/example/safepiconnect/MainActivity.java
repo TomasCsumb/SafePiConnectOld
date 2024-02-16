@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             BluetoothDevice device = result.getDevice();
             if (!foundDevices.contains(device)) {
                 foundDevices.add(device);
-                Toast.makeText(MainActivity.this, "Device found", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Device found", Toast.LENGTH_SHORT).show();
                 // Update your list view or notify the adapter
             }
         }
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice device = result.getDevice();
                 if (!foundDevices.contains(device)) {
                     foundDevices.add(device);
-                    Toast.makeText(MainActivity.this, "Device found", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(MainActivity.this, "Device found", Toast.LENGTH_SHORT).show();
                     // Update your list view or notify the adapter
                 }
             }
